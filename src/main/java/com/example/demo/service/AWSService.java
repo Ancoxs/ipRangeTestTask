@@ -14,7 +14,7 @@ public class AWSService {
         this.webClient = webClientBuilder.baseUrl("https://ip-ranges.amazonaws.com/ip-ranges.json").build();
     }
 
-    public Mono<IPRanges> someRestCall() {
+    public Mono<IPRanges> getIpRanges() {
         return this.webClient.get().retrieve().bodyToMono(IPRanges.class);
     }
 
