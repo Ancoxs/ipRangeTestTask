@@ -1,22 +1,20 @@
 package com.example.demo.controller;
 
 import com.example.demo.domainValue.ValidRegions;
-import com.example.demo.model.IPRanges;
 import com.example.demo.model.Prefix;
 import com.example.demo.model.mapper.IPRangesMapper;
 import com.example.demo.service.AWSService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import reactor.core.publisher.Flux;
 
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @RestController
-@RequestMapping("v1/ipranges")
+@RequestMapping("/v1/ipranges")
 public class IPRangesController {
 
     @Autowired
@@ -26,7 +24,7 @@ public class IPRangesController {
 
     @GetMapping()
     @ResponseStatus(HttpStatus.FOUND)
-    public Flux<String> findIPRanges(@RequestParam ValidRegions validRegion) {
+    public @ResponseBody Flux<String> findIPRanges(@RequestParam ValidRegions validRegion) {
         Flux<String> result;
         if (validRegion.name().equals("ALL")) {
             result = awsService.getIpRanges()
@@ -46,12 +44,23 @@ public class IPRangesController {
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleTypeMismatch(MethodArgumentTypeMismatchException ex){
         String name = ex.getName();
         String type = ex.getRequiredType().getSimpleName();
         Object value = ex.getValue();
         String message = String.format("The specified region is not a valid one",
                 name, type, value);
+        return message;
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleTypeMismatch(MissingServletRequestParameterException ex){
+        String name = ex.getParameterName();
+        String type = ex.getParameterType();
+        String message = String.format("The specified region should not be null",
+                name, type);
         return message;
     }
 
