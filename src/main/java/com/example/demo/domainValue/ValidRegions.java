@@ -7,5 +7,6 @@ public enum ValidRegions {
     CN,
     SA,
     AF,
-    CA
+    CA,
+    ALL
 }
