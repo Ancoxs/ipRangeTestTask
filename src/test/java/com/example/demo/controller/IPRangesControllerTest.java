@@ -1,40 +1,52 @@
 package com.example.demo.controller;
 
+import com.example.demo.service.AWSService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.web.servlet.MockMvc;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 
-@WebMvcTest(IPRangesController.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Import(AWSService.class)
 public class IPRangesControllerTest {
+
     @Autowired
-    private MockMvc mockMvc;
-    @MockBean
-    private IPRangesController ipRangesController;
+    WebTestClient client;
 
     @Test
-    public void findIPRangesShouldReturn302ResponseStatusWithValidRegion() throws Exception {
-        this.mockMvc.perform(get("/v1/ipranges?validRegion=EU")).andDo(print())
-                .andExpect(status().isFound());
+    public void findIPRangesShouldReturnPlainText(){
+        client.get().uri("/v1/ipranges?validRegion=ALL")
+                .exchange().expectBody(String.class);
     }
 
     @Test
-    public void findIPRangesShouldReturn400ResponseStatusWithInValidRegion() throws Exception {
-        this.mockMvc.perform(get("/v1/ipranges?validRegion=ER")).andDo(print())
-                .andExpect(status().isBadRequest());
+    public void findIPRangesShouldReturn302ResponseStatusWithValidRegion(){
+        client.get().uri("/v1/ipranges?validRegion=ALL")
+                .exchange()
+                .expectStatus().isFound();
     }
 
     @Test
-    public void findIPRangesShouldReturn400ResponseStatusWithNullRegion() throws Exception {
-        this.mockMvc.perform(get("/v1/ipranges?validRegion=")).andDo(print())
-                .andExpect(status().isBadRequest());
+    public void findIPRangesforEURegionShouldNotContainUSIP(){
+        client.get().uri("/v1/ipranges?validRegion=EU")
+                .exchange()
+                .expectStatus().isFound()
+                .expectBodyList(String.class).doesNotContain("150.222.234.54/31");
     }
 
+    @Test
+    public void findIPRangesShouldReturn400ResponseStatusWithInValidRegion() {
+        client.get().uri("/v1/ipranges?validRegion=ED")
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
 
+    @Test
+    public void findIPRangesShouldReturn400ResponseStatusWithNullRegion() {
+        client.get().uri("/v1/ipranges?validRegion=")
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
 }

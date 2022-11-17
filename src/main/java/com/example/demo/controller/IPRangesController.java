@@ -5,6 +5,7 @@ import com.example.demo.model.Prefix;
 import com.example.demo.model.mapper.IPRangesMapper;
 import com.example.demo.service.AWSService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
@@ -56,7 +57,7 @@ public class IPRangesController {
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String handleTypeMismatch(MissingServletRequestParameterException ex){
+    public String handleMissingRequestParameter(MissingServletRequestParameterException ex){
         String name = ex.getParameterName();
         String type = ex.getParameterType();
         String message = String.format("The specified region should not be null",
