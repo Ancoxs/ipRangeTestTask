@@ -30,13 +30,13 @@ public class IPRangesController {
         if (validRegion.name().equals("ALL")) {
             result = awsService.getIpRanges()
                     .map(ipRangesMapper::toPrefixes)
-                    .flatMapIterable(IPRanges -> IPRanges)
+                    .flatMapIterable(prefixes -> prefixes)
                     .map(Prefix::getIpPrefix)
                     .map(prefix -> prefix.concat(System.lineSeparator()));
         } else{
             result = awsService.getIpRanges()
                     .map(ipRangesMapper::toPrefixes)
-                    .flatMapIterable(IPRanges -> IPRanges)
+                    .flatMapIterable(prefixes -> prefixes)
                     .filter(((Function<Prefix, Boolean>) Prefix -> Prefix.getRegion().startsWith(validRegion.name().toLowerCase()))::apply)
                     .map(Prefix::getIpPrefix)
                     .map(prefix -> prefix.concat(System.lineSeparator()));
