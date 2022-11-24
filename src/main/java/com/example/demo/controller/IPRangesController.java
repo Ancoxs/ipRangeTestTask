@@ -18,14 +18,18 @@ import java.util.function.Function;
 @RequestMapping("/v1/ipranges")
 public class IPRangesController {
 
-    @Autowired
-    AWSService awsService;
-    @Autowired
-    IPRangesMapper ipRangesMapper;
+
+    private final AWSService awsService;
+    private final IPRangesMapper ipRangesMapper;
+
+    public IPRangesController(AWSService awsService, IPRangesMapper ipRangesMapper) {
+        this.awsService = awsService;
+        this.ipRangesMapper = ipRangesMapper;
+    }
 
     @GetMapping()
     @ResponseStatus(HttpStatus.FOUND)
-    public @ResponseBody Flux<String> findIPRanges(@RequestParam ValidRegions validRegion) {
+    public @ResponseBody Flux<String> findIPRanges(@RequestParam(name = "region") ValidRegions validRegion) {
         Flux<String> result;
         if (validRegion.name().equals("ALL")) {
             result = awsService.getIpRanges()
